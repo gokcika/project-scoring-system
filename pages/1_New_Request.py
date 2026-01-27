@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+import pandas as pd
 from utils.database import Database
 from utils.scoring import *
 
