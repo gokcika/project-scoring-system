@@ -132,5 +132,18 @@ if len(projects) > 0:
         )
     
     with col2:
-        # Excel download would require openpyxl, keeping it simple for now
-        st.info("Excel export: Add openpyxl to requirements.txt")
+        # Excel export
+        from io import BytesIO
+        
+        excel_buffer = BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            projects.to_excel(writer, index=False, sheet_name='Projects')
+        
+        excel_data = excel_buffer.getvalue()
+        
+        st.download_button(
+            label="📊 Download as Excel",
+            data=excel_data,
+            file_name=f"project_data_{pd.Timestamp.now().strftime('%Y%m%d')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
