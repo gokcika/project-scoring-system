@@ -1,6 +1,5 @@
 import streamlit as st
 from utils.database import Database
-from utils.auth import check_password
 import pandas as pd
 
 # Page config
