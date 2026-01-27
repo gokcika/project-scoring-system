@@ -132,9 +132,9 @@ else:
                 with col3:
                     st.metric("Efficiency Gain", f"{project['op_efficiency_gain']:.1f}%")
                 
-                st.markdown("#### Section 5: Resource Requirements")
+                st.markdown("#### Section 5: Implementation Approach")
                 st.text_input("Approach", project['res_approach'], disabled=True)
-                st.number_input("Total Hours", value=float(project['res_total_hours'] or 0), disabled=True)
+                st.number_input("External Dependencies", project['res_external_deps'] , disabled=True)
                 
                 st.markdown("#### Section 6: Data Sensitivity")
                 st.text_input("Data Type", project['data_type'], disabled=True)
