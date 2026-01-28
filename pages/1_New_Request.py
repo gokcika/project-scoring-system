@@ -74,7 +74,7 @@ with st.form("project_request"):
     rep_headline = st.text_input(
         "Describe the primary risk or impact if this issue remains unaddressed",
         help="Focus on concrete business impacts",
-        placeholder="Example: Customer data breach exposing PII of 10,000+ users"
+        placeholder="Example: Inadequate adverse event monitoring system may lead to delayed signal detection and regulatory action"
     )
     
     rep_risk_level = st.select_slider(
