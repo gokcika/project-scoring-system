@@ -627,9 +627,6 @@ else:
                                 import time
                                 time.sleep(2)
                                 st.rerun()
-```
-
----
 
 ## Commit
 ```
