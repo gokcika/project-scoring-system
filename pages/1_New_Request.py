@@ -51,7 +51,7 @@ with st.form("project_request"):
             placeholder="Example: 1_D_6 Global Compliance 2.3.1.1"
         )
         reg_deadline = st.selectbox(
-            ""What is the required compliance due date to meet regulatory or legal obligations?", 
+            "What is the required compliance due date to meet regulatory or legal obligations?", 
             ["<3 months", "3-6 months", "6-12 months", ">12 months", "No specific deadline"])
             help="Select the timeframe by which compliance must be achieved"
         reg_enforcement = st.radio(
