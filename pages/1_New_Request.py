@@ -74,7 +74,7 @@ with st.form("project_request"):
     rep_headline = st.text_input(
         "Describe the primary risk or impact if this issue remains unaddressed",
         help="Focus on concrete business impacts",
-        placeholder="Example: Inadequate adverse event monitoring system may lead to delayed signal detection and regulatory action"
+        placeholder="Example: Inadequate monitoring may lead to delayed detection and regulatory action"
     )
     
     rep_risk_level = st.select_slider(
