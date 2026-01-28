@@ -139,88 +139,84 @@ else:
                 with col3:
                     st.metric("Efficiency Gain", f"{project.get('op_efficiency_gain', 0):.1f}%")
                 st.text_input("Scope", project.get('op_scope', ''), disabled=True)
-                st.text_input("Blocking Other Initiatives?", project.get('op_blocker', ''), disabled=True if 'op_blocker' in project else True)
                 
                 st.markdown("#### 5. Implementation Approach")
-
-col1, col2 = st.columns(2)
-with col1:
-    st.text_input("Approach", project.get('res_approach', ''), disabled=True)
-with col2:
-    # External Dependencies - Compliance Officer can edit
-    current_deps = project.get('res_external_deps', '')
-    if not current_deps or current_deps == '':
-        st.info("⚠️ External dependencies not yet assessed by Compliance Officer")
-    else:
-        st.text_input("External Dependencies", current_deps, disabled=True)
-
-# Add edit form for external dependencies
-with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
-    st.markdown("**Note:** This assessment is performed by Compliance Officers only, not visible to requestors.")
-    
-    with st.form(f"external_deps_form_{selected_id}"):
-        new_external_deps = st.multiselect(
-            "External dependencies for this project",
-            ["None", "Third-party vendor required", "Multiple system integrations needed"],
-            default=[d.strip() for d in current_deps.split(',') if d.strip()] if current_deps else [],
-            help="Select all dependencies identified during review"
-        )
-        
-        deps_notes = st.text_area(
-            "Notes on external dependencies",
-            placeholder="Document specific vendors, integrations, or external factors...",
-            help="Optional: provide context for future reference"
-        )
-        
-        submit_deps = st.form_submit_button("💾 Save Dependencies Assessment")
-        
-        if submit_deps:
-            update_data = {
-                'res_external_deps': ','.join(new_external_deps),
-                'co_reviewed_by': st.session_state.user['username'],
-                'co_reviewed_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-            
-            # Recalculate resource score with new dependencies
-            from utils.scoring import calculate_resource_score
-            new_res_score = calculate_resource_score(
-                project.get('res_approach', ''),
-                0,
-                ','.join(new_external_deps)
-            )
-            update_data['res_score'] = new_res_score
-            
-            # Recalculate total if no override exists
-            if not project.get('co_final_score'):
-                from utils.scoring import calculate_total_score, get_priority
-                scores = {
-                    'reg': project.get('reg_score', 0),
-                    'rep': project.get('rep_score', 0),
-                    'strat': project.get('strat_score', 0),
-                    'op': project.get('op_score', 0),
-                    'res': new_res_score,
-                    'data': project.get('data_score', 0),
-                    'stake': project.get('stake_score', 0)
-                }
-                new_total = calculate_total_score(scores)
-                new_priority = get_priority(new_total)
-                update_data['total_score'] = new_total
-                update_data['priority'] = new_priority
-            
-            st.session_state.db.update_project(selected_id, update_data)
-            st.success("✅ External dependencies assessment saved and score updated")
-            
-            import time
-            time.sleep(1)
-            st.rerun()
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.text_input("Approach", project.get('res_approach', ''), disabled=True)
+                with col2:
+                    current_deps = project.get('res_external_deps', '')
+                    if not current_deps or current_deps == '':
+                        st.info("⚠️ External dependencies not yet assessed")
+                    else:
+                        st.text_input("External Dependencies", current_deps, disabled=True)
                 
-            st.markdown("#### 6. Data & Privacy Considerations")
-            st.text_input("Data Type", project.get('data_type', ''), disabled=True)
-            st.text_input("Third Party Access?", project.get('data_third_party', ''), disabled=True)
+                # External Dependencies Assessment (Compliance Only)
+                with st.expander("✏️ Assess External Dependencies (Compliance Officer Only)"):
+                    st.markdown("**Note:** External dependencies are assessed by Compliance Officers during review, not visible to requestors.")
+                    
+                    with st.form(f"external_deps_form_{selected_id}"):
+                        new_external_deps = st.multiselect(
+                            "External dependencies for this project",
+                            ["None", "Third-party vendor required", "Multiple system integrations needed"],
+                            default=[d.strip() for d in current_deps.split(',') if d.strip()] if current_deps else [],
+                            help="Select all dependencies identified during review"
+                        )
+                        
+                        deps_notes = st.text_area(
+                            "Notes on external dependencies",
+                            placeholder="Document specific vendors, integrations, or external factors...",
+                            help="Optional: provide context for future reference"
+                        )
+                        
+                        submit_deps = st.form_submit_button("💾 Save Dependencies Assessment")
+                        
+                        if submit_deps:
+                            from utils.scoring import calculate_resource_score, calculate_total_score, get_priority
+                            
+                            # Recalculate resource score
+                            new_res_score = calculate_resource_score(
+                                project.get('res_approach', ''),
+                                0,
+                                ','.join(new_external_deps)
+                            )
+                            
+                            # Recalculate total
+                            scores = {
+                                'reg': project.get('reg_score', 0),
+                                'rep': project.get('rep_score', 0),
+                                'strat': project.get('strat_score', 0),
+                                'op': project.get('op_score', 0),
+                                'res': new_res_score,
+                                'data': project.get('data_score', 0),
+                                'stake': project.get('stake_score', 0)
+                            }
+                            new_total = calculate_total_score(scores)
+                            new_priority = get_priority(new_total)
+                            
+                            update_data = {
+                                'res_external_deps': ','.join(new_external_deps),
+                                'res_score': new_res_score,
+                                'total_score': new_total,
+                                'priority': new_priority,
+                                'co_reviewed_by': st.session_state.user['username'],
+                                'co_reviewed_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            
+                            st.session_state.db.update_project(selected_id, update_data)
+                            st.success("✅ External dependencies assessment saved and score updated")
+                            
+                            import time
+                            time.sleep(1)
+                            st.rerun()
                 
-            st.markdown("#### 7. Stakeholder Context")
-            st.text_input("Requestor Level", project.get('stake_requestor_level', ''), disabled=True)
-            st.text_area("Urgency Justification", project.get('stake_urgency', ''), disabled=True)
+                st.markdown("#### 6. Data & Privacy Considerations")
+                st.text_input("Data Type", project.get('data_type', ''), disabled=True)
+                st.text_input("Third Party Access?", project.get('data_third_party', ''), disabled=True)
+                
+                st.markdown("#### 7. Stakeholder Context")
+                st.text_input("Requestor Level", project.get('stake_requestor_level', ''), disabled=True)
+                st.text_area("Urgency Justification", project.get('stake_urgency', ''), disabled=True)
             
             with tab2:
                 st.markdown("#### Current Scoring Breakdown")
@@ -396,7 +392,7 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                     
                     st.markdown("---")
                     
-                    # Data Sensitivity
+                    # Data
                     st.markdown("##### 6. Data Sensitivity")
                     col1, col2, col3 = st.columns([2, 1, 2])
                     with col1:
@@ -446,7 +442,7 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                     
                     st.markdown("---")
                     
-                    # Override Justification
+                    # Justification
                     st.markdown("##### Justification for Changes")
                     override_notes = st.text_area(
                         "Explain why you are adjusting these scores",
@@ -455,7 +451,7 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                         help="Required if any scores are changed"
                     )
                     
-                    # Summary of changes
+                    # Summary
                     changes = []
                     if override_reg != project.get('reg_score', 0):
                         changes.append(f"Regulatory: {project.get('reg_score', 0):.1f} → {override_reg:.1f}")
@@ -480,11 +476,9 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                     submit_override = st.form_submit_button("💾 Save Adjustments", use_container_width=True, type="primary")
                     
                     if submit_override:
-                        # Validation
                         if changes and (not override_notes or len(override_notes) < 10):
                             st.error("❌ Justification is required when changing scores (minimum 10 characters)")
                         else:
-                            # Calculate new total
                             final_scores = {
                                 'reg': override_reg,
                                 'rep': override_rep,
@@ -498,7 +492,6 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                             final_total = calculate_total_score(final_scores)
                             final_priority = get_priority(final_total)
                             
-                            # Update database
                             update_data = {
                                 'co_reviewed_by': st.session_state.user['username'],
                                 'co_reviewed_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -517,7 +510,6 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                             
                             st.session_state.db.update_project(selected_id, update_data)
                             
-                            # Show results
                             original_total = project.get('total_score', 0)
                             st.success(f"✅ Adjustments saved successfully!")
                             
@@ -537,7 +529,6 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
             with tab4:
                 st.markdown("#### Final Decision")
                 
-                # Calculate final score safely
                 try:
                     if project.get('co_final_score') is not None and project['co_final_score'] != '':
                         final_score = float(project['co_final_score'])
@@ -550,17 +541,14 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                     st.error("⚠️ Invalid score value in database.")
                     final_score = 0.0
                 
-                # Get priority
                 current_priority = get_priority(final_score)
                 
-                # Display score
                 col1, col2 = st.columns(2)
                 with col1:
                     st.metric("Final Score", f"{final_score:.1f}/100")
                 with col2:
                     st.metric("Priority", current_priority)
                 
-                # Decision form
                 with st.form(f"decision_form_{selected_id}"):
                     decision = st.radio("Decision", 
                         ["Approve", "Approve with Conditions", "Request More Info", "Reject"])
@@ -599,7 +587,6 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                             time.sleep(2)
                             st.rerun()
                 
-                # Delete section
                 st.markdown("---")
                 st.markdown("### ⚠️ Delete Project")
                 
@@ -629,7 +616,6 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                             elif not deletion_reason or len(deletion_reason) < 10:
                                 st.error("❌ Please provide a detailed reason (minimum 10 characters)")
                             else:
-                                # Soft delete
                                 st.session_state.db.soft_delete_project(
                                     selected_id, 
                                     st.session_state.user['username'],
@@ -638,7 +624,13 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
                                 st.success(f"✅ Project #{selected_id} has been deleted and archived")
                                 st.info("The project has been removed from active queues but is retained for audit purposes.")
                                 
-                                # Wait 2 seconds then rerun
                                 import time
                                 time.sleep(2)
                                 st.rerun()
+```
+
+---
+
+## Commit
+```
+Fix Review Queue - restore all 4 tabs with complete functionality
