@@ -215,12 +215,12 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
             st.rerun()
                 
             st.markdown("#### 6. Data & Privacy Considerations")
-                st.text_input("Data Type", project.get('data_type', ''), disabled=True)
-                st.text_input("Third Party Access?", project.get('data_third_party', ''), disabled=True)
+            st.text_input("Data Type", project.get('data_type', ''), disabled=True)
+            st.text_input("Third Party Access?", project.get('data_third_party', ''), disabled=True)
                 
-                st.markdown("#### 7. Stakeholder Context")
-                st.text_input("Requestor Level", project.get('stake_requestor_level', ''), disabled=True)
-                st.text_area("Urgency Justification", project.get('stake_urgency', ''), disabled=True)
+            st.markdown("#### 7. Stakeholder Context")
+            st.text_input("Requestor Level", project.get('stake_requestor_level', ''), disabled=True)
+            st.text_area("Urgency Justification", project.get('stake_urgency', ''), disabled=True)
             
             with tab2:
                 st.markdown("#### Current Scoring Breakdown")
