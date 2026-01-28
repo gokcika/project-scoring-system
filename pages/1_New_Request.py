@@ -48,10 +48,12 @@ with st.form("project_request"):
         reg_citation = st.text_area(
             "Cite the specific regulation, directive, or compliance standard", 
             help="Include regulation name, article/section, and link to official text if available",
-            placeholder="Example: GDPR Article 32 - Security of Processing"
+            placeholder="Example: 1_D_6 Global Compliance 2.3.1.1"
         )
-        reg_deadline = st.selectbox("What is the compliance deadline?", 
+        reg_deadline = st.selectbox(
+            ""What is the required compliance due date to meet regulatory or legal obligations?", 
             ["<3 months", "3-6 months", "6-12 months", ">12 months", "No specific deadline"])
+            help="Select the timeframe by which compliance must be achieved"
         reg_enforcement = st.radio(
             "Has the regulatory authority issued fines or sanctions in your sector for non-compliance with this requirement?", 
             ["YES", "NO"]
@@ -71,7 +73,7 @@ with st.form("project_request"):
     
     rep_headline = st.text_input(
         "Describe the primary risk or impact if this issue remains unaddressed",
-        help="Focus on concrete business impacts rather than media scenarios",
+        help="Focus on concrete business impacts",
         placeholder="Example: Customer data breach exposing PII of 10,000+ users"
     )
     
@@ -96,7 +98,7 @@ with st.form("project_request"):
     
     rep_harm_categories = st.multiselect(
         "Who could be negatively affected?",
-        ["Customers/clients", "Employees", "Shareholders", "Community/environment", "Company reputation only"],
+        ["Customers/clients", "Employees", "Shareholders", "Community/environment", "Company reputation"],
         help="Select all that apply"
     )
     
@@ -192,12 +194,6 @@ with st.form("project_request"):
         help="Select the option that best describes the technical complexity"
     )
     
-    res_external_deps = st.multiselect(
-        "External dependencies (select all that apply)",
-        ["None", "Third-party vendor required", "Multiple system integrations needed"],
-        help="Consider vendor services, APIs, data exchanges"
-    )
-    
     st.markdown("---")
     st.markdown("### 6. Data & Privacy Considerations")
     
@@ -247,7 +243,7 @@ with st.form("project_request"):
     stake_urgency = st.text_area(
         "What is the specific business consequence if this is delayed?",
         help="Be concrete: revenue impact, compliance deadline, customer commitments, etc.",
-        placeholder="Example: Required to meet Q2 customer launch commitment worth $2M ARR"
+        placeholder="Example: Failure to remediate by Q2 may result in $5M+ penalty under FCPA"
     )
     stake_urgency_clear = "YES" if len(stake_urgency) > 20 else "NO"
     
@@ -266,7 +262,7 @@ with st.form("project_request"):
                 'rep': calculate_reputational_score(rep_risk_level, ','.join(rep_harm_categories), rep_liability),
                 'strat': calculate_strategic_score(strat_document, strat_sponsor, strat_budget),
                 'op': calculate_operational_score(op_efficiency_gain, op_scope, op_blocker),
-                'res': calculate_resource_score(res_approach, 0, ','.join(res_external_deps)),
+                'res': calculate_resource_score(res_approach, 0, ''),  # No external deps from requestor,
                 'data': calculate_data_score(data_type, data_third_party, "N/A"),
                 'stake': calculate_stakeholder_score(stake_requestor_level, stake_urgency_clear)
             }
@@ -309,7 +305,7 @@ with st.form("project_request"):
                 
                 'res_approach': res_approach,
                 'res_total_hours': 0,
-                'res_external_deps': ','.join(res_external_deps),
+                'res_external_deps': '',  # Empty - will be filled by Compliance Officer
                 'res_score': scores['res'],
                 
                 'data_type': data_type,
