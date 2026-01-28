@@ -627,7 +627,3 @@ else:
                                 import time
                                 time.sleep(2)
                                 st.rerun()
-
-## Commit
-```
-Fix Review Queue - restore all 4 tabs with complete functionality
