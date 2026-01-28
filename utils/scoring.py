@@ -23,23 +23,24 @@ def calculate_regulatory_score(reg_required, reg_deadline, reg_enforcement):
 
 
 def calculate_reputational_score(risk_level, harm_categories, liability):
-    """Calculate Section 2 score"""
+    """Calculate Section 2 score - UPDATED FOR NEW LIABILITY OPTIONS"""
     risk_mapping = {
-        "5 - Active issue (media/complaints)": 5,
-        "4 - Known vulnerability": 4,
-        "3 - Potential exposure": 3,
-        "2 - Proactive positioning": 2,
-        "1 - Minimal dimension": 1
+        "1 - Minimal risk": 1,
+        "2 - Low risk, proactive measure": 2,
+        "3 - Moderate risk, potential exposure": 3,
+        "4 - High risk, known vulnerability": 4,
+        "5 - Critical risk, active issue": 5
     }
     
     score = risk_mapping.get(risk_level, 1)
     
-    # Harm adjustment
+    # Harm adjustment - UPDATED
     if harm_categories:
         harm_list = harm_categories.split(',')
-        if len(harm_list) >= 3 and "Company reputation only" not in harm_categories:
+        # Changed "Company reputation only" to "Company reputation"
+        if len(harm_list) >= 3 and "Company reputation" not in harm_categories:
             score = min(5, score + 1)
-        elif "Company reputation only" in harm_categories and len(harm_list) == 1:
+        elif "Company reputation" in harm_categories and len(harm_list) == 1:
             score = max(1, score - 1)
     
     # Liability adjustment
