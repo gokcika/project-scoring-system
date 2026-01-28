@@ -214,7 +214,7 @@ with st.expander("✏️ Edit External Dependencies (Compliance Officer Only)"):
             time.sleep(1)
             st.rerun()
                 
-                st.markdown("#### 6. Data & Privacy Considerations")
+            st.markdown("#### 6. Data & Privacy Considerations")
                 st.text_input("Data Type", project.get('data_type', ''), disabled=True)
                 st.text_input("Third Party Access?", project.get('data_third_party', ''), disabled=True)
                 
