@@ -137,8 +137,7 @@ for project in projects:
         
         with tab3:
             st.markdown("#### Manual Score Override")
-            st.write("Override scores if automated calculation doesn't reflect reality")
-            st.stop()
+            st.write("Override functionality coming soon")
         
         with tab4:
             st.markdown("#### Review Decision")
@@ -153,14 +152,3 @@ for project in projects:
             with col2:
                 if st.button("❌ Reject", key=f"reject_{project['id']}", use_container_width=True):
                     st.error(f"Project #{project['id']} rejected")
-```
-
----
-
-## ÇÖZÜM 3: Git Conflict Kontrolü
-
-**Dosyayı text editor'da aç, şunları ara:**
-```
-<<<<<<< HEAD
-=======
->>>>>>> branch-name
