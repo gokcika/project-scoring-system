@@ -1,15 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.database import get_pending_projects, get_project_by_id, update_project_decision
-from utils.scoring import (
-    calculate_regulatory_score,
-    calculate_reputational_score,
-    calculate_strategic_score,
-    calculate_operational_score,
-    calculate_resource_score,
-    calculate_data_score,
-    calculate_stakeholder_score
-)
+from utils.database import *
 
 if 'authenticated' not in st.session_state or not st.session_state.authenticated:
     st.warning("Please login first")
@@ -21,7 +12,11 @@ if st.session_state.role not in ['compliance', 'admin']:
 
 st.title("Review Queue")
 
-projects = get_pending_projects()
+conn = get_db_connection()
+c = conn.cursor()
+c.execute("SELECT * FROM projects WHERE status = 'Pending Review' AND deleted = 0 ORDER BY submission_date DESC")
+projects = [dict(row) for row in c.fetchall()]
+conn.close()
 
 if not projects:
     st.info("No projects pending review")
@@ -39,7 +34,9 @@ for project in projects:
     }
     priority_icon = priority_colors.get(project.get('priority', 'MEDIUM'), "⚪")
     
-    with st.expander(f"{priority_icon} **#{project['id']}** - {project['title'][:80]}{'...' if len(project['title']) > 80 else ''}"):
+    title_display = project['title'][:80] + '...' if len(project['title']) > 80 else project['title']
+    
+    with st.expander(f"{priority_icon} **#{project['id']}** - {title_display}"):
         col1, col2, col3 = st.columns([2, 1, 1])
         
         with col1:
@@ -51,6 +48,10 @@ for project in projects:
         
         with col3:
             st.metric("Priority", project.get('priority', 'N/A'))
+        
+        st.divider()
+        
+        st.text_area("Full Title and Description", value=project['title'], height=120, disabled=True, key=f"full_title_{project['id']}")
         
         st.divider()
         
@@ -137,7 +138,7 @@ for project in projects:
         
         with tab3:
             st.markdown("#### Manual Score Override")
-            st.write("Override functionality coming soon")
+            st.info("Override functionality - existing code from your original file")
         
         with tab4:
             st.markdown("#### Review Decision")
@@ -147,8 +148,22 @@ for project in projects:
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("✅ Approve", key=f"approve_{project['id']}", use_container_width=True):
+                    conn = get_db_connection()
+                    c = conn.cursor()
+                    c.execute("UPDATE projects SET status = 'Approved', co_decision = 'Approved', co_notes = ?, co_reviewed_by = ?, co_reviewed_date = datetime('now') WHERE id = ?", 
+                             (notes, st.session_state.username, project['id']))
+                    conn.commit()
+                    conn.close()
                     st.success(f"Project #{project['id']} approved")
+                    st.rerun()
             
             with col2:
                 if st.button("❌ Reject", key=f"reject_{project['id']}", use_container_width=True):
+                    conn = get_db_connection()
+                    c = conn.cursor()
+                    c.execute("UPDATE projects SET status = 'Rejected', co_decision = 'Rejected', co_notes = ?, co_reviewed_by = ?, co_reviewed_date = datetime('now') WHERE id = ?", 
+                             (notes, st.session_state.username, project['id']))
+                    conn.commit()
+                    conn.close()
                     st.error(f"Project #{project['id']} rejected")
+                    st.rerun()
