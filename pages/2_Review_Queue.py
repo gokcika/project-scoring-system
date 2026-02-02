@@ -6,7 +6,7 @@ if 'authenticated' not in st.session_state or not st.session_state.authenticated
     st.warning("Please login first")
     st.stop()
 
-if st.session_state.role not in ['compliance', 'admin']:
+if st.session_state.get('role') not in ['compliance', 'admin']:
     st.error("Access denied. Compliance Officer access required.")
     st.stop()
 
