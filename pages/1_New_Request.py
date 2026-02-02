@@ -26,7 +26,7 @@ with st.form("project_request"):
     
     col1, col2 = st.columns(2)
     with col1:
-        project_title = st.text_input("Project Title *", 
+        project_title = st.text_input("Project Title and Description *", 
             help="Brief descriptive title for your project")
         requestor_name = st.text_input("Your Name *", 
             value=st.session_state.user['username'])
